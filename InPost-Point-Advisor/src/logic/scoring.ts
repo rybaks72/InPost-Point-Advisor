@@ -5,7 +5,7 @@ export function calculateScore(point: InPostPoint, distanceKm: number, preferenc
   let score = 0;
   const reasons: string[] = [];
 
-  const distanceScore = Math.max(0, 400 - distanceKm * 25);
+  const distanceScore = Math.max(0, 400 - distanceKm * 80);
   score += distanceScore;
 
   if (isOperating(point)) {

@@ -30,21 +30,26 @@ export async function fetchPointsPage(page: number,perPage: number,country?: str
 }
 
 export async function fetchPoints(options: FetchPointsOptions): Promise<InPostPoint[]> {
-  const allPoints: InPostPoint[] = [];
+  const firstPage = await fetch(buildPointsUrl(1, options.perPage, options.country));
+  if (!firstPage.ok) throw new Error("Failed to fetch InPost points.");
+  
+  const firstData: PointsApiResponse = await firstPage.json();
+  const allPoints: InPostPoint[] = [...firstData.items];
+  
+  const totalPages = firstData.total_pages;
+  
+  if (totalPages <= 1) return allPoints;
 
-  for (let page = 1; page <= options.maxPages; page++) {
-    const pointsFromPage = await fetchPointsPage(
-      page,
-      options.perPage,
-      options.country
-    );
+  const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+  
+  const results = await Promise.all(
+    remainingPages.map(async (page) => {
+      const response = await fetch(buildPointsUrl(page, options.perPage, options.country));
+      if (!response.ok) throw new Error(`Failed to fetch page ${page}.`);
+      const data: PointsApiResponse = await response.json();
+      return data.items;
+    })
+  );
 
-    allPoints.push(...pointsFromPage);
-
-    if (pointsFromPage.length === 0) {
-      break;
-    }
-  }
-
-  return allPoints;
+  return allPoints.concat(results.flat());
 }

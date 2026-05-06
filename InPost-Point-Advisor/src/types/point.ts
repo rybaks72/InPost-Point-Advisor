@@ -29,7 +29,6 @@ export type PointsApiResponse = {
 
 export type FetchPointsOptions = {
   country?: string;
-  maxPages: number;
   perPage: number;
 };
 
@@ -37,7 +36,6 @@ export type SearchPreferences = {
   address: string;
   country: string;
   countryName: string;
-  maxPages: number;
   maxResults: number;
   maxDistanceKm: number;
   onlyOperating: boolean;

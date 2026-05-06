@@ -19,7 +19,6 @@ function App() {
     address: "Palace of Culture and Science",
     country: "PL",
     countryName: "Poland",
-    maxPages: 50,
     maxResults: 10,
     maxDistanceKm: 5,
     onlyOperating: true,
@@ -45,14 +44,18 @@ function App() {
       setError("Country is required.");
       return;
     }
+    if (!preferences.address.trim()) {
+      setError("Please enter an address or city.");
+      return;
+    }
 
    try {
       setIsLoading(true);
       setError(null);
+      setSelectedPoint(null);
 
       const loadedPoints = await fetchPoints({
         country: preferences.country,
-        maxPages: preferences.maxPages,
         perPage: 500,
       });
 

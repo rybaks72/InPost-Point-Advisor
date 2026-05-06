@@ -76,6 +76,9 @@ function SearchForm({ preferences, onPreferencesChange, onSubmit, isLoading }: S
                     <option key={c.code} value={c.name} />
                     ))}
                 </datalist>
+                {!COUNTRIES.find(c => c.name.toLowerCase() === preferences.countryName.toLowerCase()) && preferences.countryName.length > 0 && (
+                <span className="form-hint form-hint--warn">InPost has not yet reached this country...</span>
+                )}
                 </div>
 
                 <div className="form-row">
@@ -83,6 +86,8 @@ function SearchForm({ preferences, onPreferencesChange, onSubmit, isLoading }: S
                 <input
                     id="maxResults"
                     type="number"
+                    min="1"
+                    max="50"
                     placeholder="10"
                     value={preferences.maxResults}
                     onChange={(event) =>
@@ -156,7 +161,7 @@ function SearchForm({ preferences, onPreferencesChange, onSubmit, isLoading }: S
                         })
                     }
                 />
-                <label htmlFor="only24h">Prefer 24/7 availability</label>
+                <label htmlFor="only24h">24/7 availability</label>
                 </div>
 
                 <button type="submit" className="primary-button" disabled={isLoading}>
