@@ -12,6 +12,7 @@ import { geocodeAddress } from "./api/geocodingApi";
 
 function App() {
   const [points, setPoints] = useState<InPostPoint[]>([]);
+  const [currentCountry, setCurrentCountry] = useState<string>("");
   const [recommendedPoints, setRecommendedPoints] = useState<RecommendedPoint[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,18 +55,18 @@ function App() {
       setError(null);
       setSelectedPoint(null);
 
-      const loadedPoints = await fetchPoints({
-        country: preferences.country,
-        perPage: 500,
-      });
+      let loadedPoints = points;
+      if (preferences.country !== currentCountry || points.length === 0) {
+        loadedPoints = await fetchPoints({
+          country: preferences.country,
+          perPage: 500,
+        });
+        setPoints(loadedPoints);
+        setCurrentCountry(preferences.country);
+      }
 
-      setPoints(loadedPoints);
       const userLocation = await geocodeAddress(preferences.address, preferences.country);
-      const recommendations = recommendPoints(
-      loadedPoints,
-      userLocation,
-      preferences
-      );
+      const recommendations = recommendPoints(loadedPoints, userLocation, preferences);
       setRecommendedPoints(recommendations);
     } catch (err) {
       setError("Could not load InPost points.");
