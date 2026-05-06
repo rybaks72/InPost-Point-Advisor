@@ -8,6 +8,7 @@ type MapProps = {
     recommendedPoints : RecommendedPoint[];
     selectedPoint: RecommendedPoint | null;
     mapRef: React.RefObject<HTMLElement | null>;
+    userLocation: { latitude: number; longitude: number } | null;
 }
 
 function makeNumberedIcon(number: number) {
@@ -26,6 +27,17 @@ function makeNumberedIcon(number: number) {
   });
 }
 
+const userLocationIcon = L.divIcon({
+  className: "",
+  html: `<div style="
+    width:16px;height:16px;border-radius:50%;
+    background:#f8ce27;border:3px solid #172033;
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  "></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
 function FlyToPoint({ point }: { point: RecommendedPoint | null }) {
   const map = useMap();
   useEffect(() => {
@@ -42,7 +54,7 @@ function FlyToPoint({ point }: { point: RecommendedPoint | null }) {
 
 const DEFAULT_CENTER: [number, number] = [52.2297, 21.0122];
 
-function Map({ recommendedPoints, selectedPoint, mapRef }: MapProps) {
+function Map({ recommendedPoints, selectedPoint, mapRef, userLocation }: MapProps) {
     const hasPoints = recommendedPoints.length > 0;
 
   const center: [number, number] = hasPoints
@@ -85,6 +97,14 @@ function Map({ recommendedPoints, selectedPoint, mapRef }: MapProps) {
                     </Popup>
                 </Marker>
                 ))}
+                {userLocation && (
+                  <Marker
+                    position={[userLocation.latitude, userLocation.longitude]}
+                    icon={userLocationIcon}
+                  >
+                    <Popup>Your search location</Popup>
+                  </Marker>
+                )}
                 <FlyToPoint point={selectedPoint} />
             </MapContainer>
         </section>

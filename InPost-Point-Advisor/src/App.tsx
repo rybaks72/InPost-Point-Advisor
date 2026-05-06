@@ -27,6 +27,7 @@ function App() {
     preferredType: "any",
   });
   const [selectedPoint, setSelectedPoint] = useState<RecommendedPoint | null>(null);
+  const [userLocation, setUserLocation] = useState<{latitude: number, longitude: number} | null>(null);
   const mapRef = useRef<HTMLElement>(null);
 
   async function handleSearch(event: React.FormEvent<HTMLFormElement>){
@@ -66,6 +67,7 @@ function App() {
       }
 
       const userLocation = await geocodeAddress(preferences.address, preferences.country);
+      setUserLocation(userLocation);
       const recommendations = recommendPoints(loadedPoints, userLocation, preferences);
       setRecommendedPoints(recommendations);
     } catch (err) {
@@ -97,6 +99,7 @@ function App() {
                   recommendedPoints={recommendedPoints.slice(0, 5)}
                   selectedPoint={selectedPoint}
                   mapRef={mapRef}
+                  userLocation={userLocation}
                 />
             </section>
             <RankingList 
