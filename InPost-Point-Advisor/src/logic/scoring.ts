@@ -22,7 +22,7 @@ export function calculateScore(point: InPostPoint, distanceKm: number, preferenc
 
   if (preferences.preferredType !== "any" && pointType === preferences.preferredType) {
     score += 15;
-    reasons.push(`Matches preferred type: ${preferences.preferredType}`);
+    reasons.push(`${preferences.preferredType}`);
   }
 
   if (distanceKm <= 1) {

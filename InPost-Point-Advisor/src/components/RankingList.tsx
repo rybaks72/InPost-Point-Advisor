@@ -4,9 +4,11 @@ type RankingListProps = {
   recommendedPoints: RecommendedPoint[];
   isLoading: boolean;
   error: string | null;
+  onSelectPoint: (point: RecommendedPoint) => void;
+  selectedPoint: RecommendedPoint | null;
 };
 
-function RankingList({ recommendedPoints, isLoading, error }: RankingListProps) {
+function RankingList({ recommendedPoints, isLoading, error, onSelectPoint, selectedPoint }: RankingListProps) {
 
   return (
     <section className="card ranking-card">
@@ -38,40 +40,72 @@ function RankingList({ recommendedPoints, isLoading, error }: RankingListProps) 
 
       {!isLoading && !error && recommendedPoints.length > 0 && (
         <div className="ranking-list">
-          {recommendedPoints.map((recommendedPoint, index) => (
-            <article key={recommendedPoint.point.name} className="ranking-item">
-              <div className="ranking-item-main">
-                <div>
-                  <h3 className="ranking-title">
-                    #{index + 1} {recommendedPoint.point.name}
-                  </h3>
+          {recommendedPoints.map((recommendedPoint, index) => {
+            const addr = recommendedPoint.point.address_details;
+            const addressLine = addr
+              ? [addr.street, addr.building_number, addr.post_code, addr.city]
+                  .filter(Boolean)
+                  .join(" ")
+              : null;
 
-                  <p className="ranking-meta">
-                    {recommendedPoint.distanceKm.toFixed(2)} km ·{" "}
-                    {recommendedPoint.point.status} · score {recommendedPoint.score}
-                  </p>
-                </div>
+            const is24h = recommendedPoint.point.opening_hours
+              ?.toLowerCase()
+              .includes("24") ?? false;
 
-                <span className="ranking-badge">
-                  {recommendedPoint.point.address_details?.city ?? "Unknown city"}
-                </span>
-              </div>
-
-              {recommendedPoint.reasons.length > 0 && (
-                <div className="ranking-reasons">
-                  {recommendedPoint.reasons.map((reason) => (
-                    <span key={reason} className="reason-chip">
-                      {reason}
+            return (
+              <article
+                key={recommendedPoint.point.name}
+                className={`ranking-item ${selectedPoint?.point.name === recommendedPoint.point.name ? "ranking-item--selected" : ""}`}
+                onClick={() => onSelectPoint(recommendedPoint)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="ranking-item-top">
+                  <div className="ranking-item-top-left">
+                    <div className="ranking-rank-badge">
+                      {index + 1}
+                    </div>
+                    <div className="ranking-name-block">
+                      <h3 className="ranking-title">
+                        {recommendedPoint.point.name}
+                      </h3>
+                      {addressLine && (
+                        <p className="ranking-address">{addressLine}</p>
+                      )}
+                      {recommendedPoint.reasons.length > 0 && (
+                        <p className="ranking-reasons-text">
+                          {recommendedPoint.reasons.join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {addr?.city && (
+                    <span className="pill pill-city">
+                      {addr.city}
                     </span>
-                  ))}
+                  )}
                 </div>
-              )}
-            </article>
-          ))}
+
+                {/* Bottom row: pills */}
+                <div className="ranking-pills">
+                  <span className="pill pill-distance">
+                    {recommendedPoint.distanceKm.toFixed(1)} km
+                  </span>
+
+                  <span className={`pill pill-status ${recommendedPoint.point.status === "Operating" ? "pill-status--ok" : "pill-status--off"}`}>
+                    {recommendedPoint.point.status}
+                  </span>
+
+                  {is24h && (
+                    <span className="pill pill-24h">24/7</span>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
     </section>
   );
 }
 
-export default RankingList
+export default RankingList;

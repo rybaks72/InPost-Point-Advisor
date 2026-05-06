@@ -36,6 +36,7 @@ export type FetchPointsOptions = {
 export type SearchPreferences = {
   address: string;
   country: string;
+  countryName: string;
   maxPages: number;
   maxResults: number;
   maxDistanceKm: number;

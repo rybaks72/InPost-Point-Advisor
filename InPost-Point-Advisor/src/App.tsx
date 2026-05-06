@@ -5,9 +5,10 @@ import Header from "./components/Header"
 import Map from "./components/Map"
 import RankingList from "./components/RankingList"
 import { fetchPoints } from "./api/pointsApi"
-import { useState } from "react"
+import { useState, useRef} from "react"
 import type { InPostPoint, RecommendedPoint, SearchPreferences } from "./types/point"
 import { recommendPoints } from "./logic/recommendation"
+import { geocodeAddress } from "./api/geocodingApi";
 
 function App() {
   const [points, setPoints] = useState<InPostPoint[]>([]);
@@ -17,6 +18,7 @@ function App() {
   const [preferences, setPreferences] = useState<SearchPreferences>({
     address: "Palace of Culture and Science",
     country: "PL",
+    countryName: "Poland",
     maxPages: 50,
     maxResults: 10,
     maxDistanceKm: 5,
@@ -24,12 +26,8 @@ function App() {
     prefer24h: false,
     preferredType: "any",
   });
-
-  const temporaryUserLocation = {
-    latitude: 52.2318,
-    longitude: 21.0060,
-  };
-
+  const [selectedPoint, setSelectedPoint] = useState<RecommendedPoint | null>(null);
+  const mapRef = useRef<HTMLElement>(null);
 
   async function handleSearch(event: React.FormEvent<HTMLFormElement>){
     event.preventDefault();
@@ -59,9 +57,10 @@ function App() {
       });
 
       setPoints(loadedPoints);
+      const userLocation = await geocodeAddress(preferences.address, preferences.country);
       const recommendations = recommendPoints(
       loadedPoints,
-      temporaryUserLocation,
+      userLocation,
       preferences
       );
       setRecommendedPoints(recommendations);
@@ -71,6 +70,11 @@ function App() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleSelectPoint(point: RecommendedPoint) {
+    setSelectedPoint(point);
+    mapRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   return (
@@ -85,12 +89,18 @@ function App() {
                   onSubmit={handleSearch} 
                   isLoading={isLoading}
                 />
-                <Map/>
+                <Map 
+                  recommendedPoints={recommendedPoints.slice(0, 5)}
+                  selectedPoint={selectedPoint}
+                  mapRef={mapRef}
+                />
             </section>
             <RankingList 
               recommendedPoints={recommendedPoints}
               isLoading={isLoading}
               error={error}
+              onSelectPoint={handleSelectPoint}
+              selectedPoint={selectedPoint}
             />
         </main>
     </>

@@ -1,5 +1,21 @@
 import type { SearchPreferences } from "../types/point";
 
+const COUNTRIES = [
+  { code: "PL", name: "Poland" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "DE", name: "Germany" },
+  { code: "FR", name: "France" },
+  { code: "IT", name: "Italy" },
+  { code: "ES", name: "Spain" },
+  { code: "NL", name: "Netherlands" },
+  { code: "BE", name: "Belgium" },
+  { code: "PT", name: "Portugal" },
+  { code: "CZ", name: "Czech Republic" },
+  { code: "HU", name: "Hungary" },
+  { code: "RO", name: "Romania" },
+  { code: "BG", name: "Bulgaria" },
+];
+
 type SearchFormProps = {
   preferences: SearchPreferences;
   onPreferencesChange: (preferences: SearchPreferences) => void;
@@ -22,7 +38,7 @@ function SearchForm({ preferences, onPreferencesChange, onSubmit, isLoading }: S
 
             <form className="search-form" onSubmit={onSubmit}>
                 <div className="form-row">
-                <label htmlFor="address">Address or City</label>
+                <label htmlFor="address">Address</label>
                 <input
                     id="address"
                     type="text"
@@ -42,15 +58,24 @@ function SearchForm({ preferences, onPreferencesChange, onSubmit, isLoading }: S
                 <input
                     id="country"
                     type="text"
-                    placeholder="PL"
-                    value={preferences.country}
-                    onChange={(event) =>
-                        onPreferencesChange({
+                    list="country-options"
+                    placeholder="Poland"
+                    value={preferences.countryName}
+                    onChange={(event) => {
+                    const name = event.target.value;
+                    const match = COUNTRIES.find(c => c.name.toLowerCase() === name.toLowerCase());
+                    onPreferencesChange({
                         ...preferences,
-                        country: event.target.value.toUpperCase(),
-                        })
-                    }
+                        countryName: name,
+                        country: match ? match.code : preferences.country,
+                    });
+                    }}
                 />
+                <datalist id="country-options">
+                    {COUNTRIES.map(c => (
+                    <option key={c.code} value={c.name} />
+                    ))}
+                </datalist>
                 </div>
 
                 <div className="form-row">
